@@ -1,1 +1,5 @@
 # calcRegexRestApi
+
+```
+npm install
+```
