@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login - CalcRegex 2023</title>
+        <!-- bootstrap -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"/>
+        <!-- font-awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"/>
+        <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    </head>
+    <body>
+        <!-- LOADER -->
+        <div class="loader-container">
+            <span class="loader"></span>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="container login-page-container" id="loginContainer">
+            <div class="row">
+                <div class="col-sm-9 col-md-7 col-lg-4 mx-auto">
+                    <div class="bg-transparent card border-0 rounded-3">
+                        <div class="card-body">
+                            <form onsubmit="submitForm(event, this)">
+                                <div class="form-floating">
+                                    <input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com" required/>
+                                    <label class="text-muted" for="floatingInput">Email address</label>
+                                </div>
+                                <div class="form-floating">
+                                    <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" minlength="8" required/>
+                                    <label class="text-muted" for="floatingPassword">Password</label>
+                                </div>
+                                <div class="d-grid">
+                                    <button class="btn btn-primary btn-login text-uppercase fw-bold" type="submit">Log in</button>
+                                </div>
+                                <p class="mt-2 mb-0">Don't have an account? <span role="button" class="link-primary">Sign up</span></p>
+                                <div class="gap-2 d-flex justify-content-between align-items-center">
+                                    <hr style="flex: 1; margin: 0;">or<hr style="flex: 1; margin: 0;">
+                                </div>
+                                <div class="d-grid">
+                                    <a class="btn btn-google btn-login text-uppercase fw-bold">
+                                        <i class="fab fa-google me-2"></i>
+                                        Sign in with Google
+                                    </a>
+                                </div>
+                                <div class="d-grid">
+                                    <a class="btn btn-facebook btn-login text-uppercase fw-bold">
+                                        <i class="fab fa-facebook-f me-2"></i>
+                                        Sign in with Facebook
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SERVICE -->
+        <div class="service" id="serviceContainer">
+            <header>
+                <div>
+                    <i class="fa-solid fa-calculator"></i>
+                    <p>CalcRegex</p>
+                </div>
+                <nav>
+                    <a>Account</a>
+                    <a href="index.html"><i class="fas fa-sign-out-alt"></i> Log out</a>
+                </nav>
+            </header>
+    
+            <div class="service-container">
+                <div class="service-left">
+                    <div class="title-section">
+                        <p class="title-1">FREE TRIAL</p>
+                        <p class="title-2" id="remaining">REMAINING 5</p>
+                    </div>
+                    <hr>
+                    <div>
+                        <p>Do you want more tries?</p>
+                        <p>
+                            Join to the group VIP to unlock infinity tries
+                            and have a greater support. Click to the button
+                            to see all prices and take one of them.
+                        </p>
+                        <a class="btn btn-primary vip btn-left fw-bold">Become VIP Member</a>
+                    </div>
+                    <div>
+                        <p>Send us a message</p>
+                        <p>
+                            Send us a message to report an issue or another
+                            think that makes your head explodes. Click here.
+                        </p>
+                        <a class="btn btn-primary btn-login btn-left fw-bold">Contact Us</a>
+                    </div>
+                </div>
+                <div class="separator"></div>
+                <div class="service-right">
+                    <div class="title-section">
+                        <p class="title-1">MATH BY CALCREGEX</p>
+                        <p class="title-2">START TO SOLVE</p>
+                    </div>
+                    <div class="operation">
+                        <p>Operation</p>
+                        <form onsubmit="submitEquation(event, this)">
+                            <input name="equation" type="text" placeholder="Type here your equation" required/>
+                            <button class="btn btn-primary btn-login fw-bold operation-send" type="submit">Generate Result</button>
+                        </form>
+                    </div>
+                    <div class="result">
+                        <p>Result</p>
+                        <p class="result-text" id="result"></p>
+                    </div>
+                    <div class="info-all">
+                        <div class="info info1">
+                            <i class="fa fas fa-chart-line"></i>
+                            <p class="info-title">Our Mission</p>
+                            <p class="info-text">
+                                At CalcRegex, our mission is to provide high-quality
+                                equations.
+                            </p>
+                        </div>
+                        <div class="info info2">
+                            <i class="fa fas fa-thumbs-up"></i>
+                            <p class="info-title">Our Goals</p>
+                            <p class="info-text">
+                                Our goal is to be the leading provider of
+                                high-quality mathematics.
+                            </p>
+                        </div>
+                        <div class="info info3">
+                            <i class="fa fas fa-tasks"></i>
+                            <p class="info-title">Exhibitions</p>
+                            <p class="info-text">
+                                We're always looking for opportunities to
+                                showcase our products.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JS -->
+        <script src="js/loader.js"></script>
+        <script src="js/index.js"></script>
+    </body>
+</html>
