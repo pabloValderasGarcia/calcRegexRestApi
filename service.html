@@ -70,12 +70,14 @@
                     <a href="index.html"><i class="fas fa-sign-out-alt"></i> Log out</a>
                 </nav>
             </header>
+
+            <div class="messages" id="messages"></div>
     
             <div class="service-container">
                 <div class="service-left">
                     <div class="title-section">
                         <p class="title-1">FREE TRIAL</p>
-                        <p class="title-2" id="remaining">REMAINING 5</p>
+                        <p class="title-2" id="remaining">REMAINING <span class="colored">5</span></p>
                     </div>
                     <hr>
                     <div>
@@ -106,7 +108,7 @@
                         <p>Operation</p>
                         <form onsubmit="submitEquation(event, this)">
                             <input name="equation" type="text" placeholder="Type here your equation" required/>
-                            <button class="btn btn-primary btn-login fw-bold operation-send" type="submit">Generate Result</button>
+                            <button id="submitEq" class="btn btn-primary btn-login fw-bold operation-send" type="submit">Generate Result</button>
                         </form>
                     </div>
                     <div class="result">

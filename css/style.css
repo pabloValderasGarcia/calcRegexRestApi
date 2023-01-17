@@ -165,6 +165,18 @@ a {
     border-color: rgb(8, 98, 76) !important;
 }
 
+.btn-login:focus-visible {
+    box-shadow: none;
+    background-color: rgb(8, 98, 76) !important;
+    border-color: rgb(8, 98, 76) !important;
+}
+
+.btn-login:disabled {
+    box-shadow: none;
+    background-color: rgb(8, 98, 76) !important;
+    border-color: rgb(8, 98, 76) !important;
+}
+
 .btn-google {
     color: white !important;
     background-color: #ea4335;
@@ -267,9 +279,20 @@ nav a:hover, nav a:hover * {
     color: #F7931E !important;
 }
 
+/* MESSAGES */
+.messages {
+    opacity: 0;
+    margin: 0 4.5em;
+    padding: .51em 2em;
+    width: auto;
+    height: fit-content;
+    background-color: rgb(214, 149, 149);
+    border-radius: 1em;
+}
+
 .service-container {
     height: 80%;
-    padding: 3.5em 4.5em;
+    padding: 2.2em 4.5em;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -391,8 +414,8 @@ form button {
 }
 
 .result-text {
-    height: 1.9em;
-    font-size: 1.4em;
+    padding: 0.5em 0.3em;
+    font-size: 1.1em;
     border-bottom: 1px solid white;
 }
 
@@ -426,4 +449,8 @@ form button {
 .info-text {
     font-size: 1.1em;
     margin-bottom: 0;
+}
+
+.colored {
+    color: #F7931E;
 }
