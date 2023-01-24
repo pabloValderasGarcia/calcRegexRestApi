@@ -280,12 +280,22 @@ nav a:hover, nav a:hover * {
 }
 
 /* MESSAGES */
+.loginMessages {
+    opacity: 0;
+    width: 92.6%;
+    margin: 0 auto;
+    height: 2.45em;
+    background-color: rgb(214, 149, 149);
+    border-radius: 1em;
+    color: black;
+    padding: 0.53em 1em;
+}
 .messages {
     opacity: 0;
     margin: 0 4.5em;
     padding: .51em 2em;
     width: auto;
-    height: fit-content;
+    height: 2.45em;
     background-color: rgb(214, 149, 149);
     border-radius: 1em;
 }
@@ -453,4 +463,8 @@ form button {
 
 .colored {
     color: #F7931E;
+}
+
+.error {
+    color: #ea4335;
 }

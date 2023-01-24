@@ -19,11 +19,12 @@
 
         <!-- LOGIN -->
         <div class="container login-page-container" id="loginContainer">
-            <div class="row">
+            <div class="row" style="transform: translateY(-10px);">
                 <div class="col-sm-9 col-md-7 col-lg-4 mx-auto">
+                    <div class="loginMessages card-body" id="loginMessages"></div>
                     <div class="bg-transparent card border-0 rounded-3">
                         <div class="card-body">
-                            <form onsubmit="submitForm(event, this)">
+                            <form onsubmit="login(event, this)">
                                 <div class="form-floating">
                                     <input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com" required/>
                                     <label class="text-muted" for="floatingInput">Email address</label>
@@ -35,7 +36,7 @@
                                 <div class="d-grid">
                                     <button class="btn btn-primary btn-login text-uppercase fw-bold" type="submit">Log in</button>
                                 </div>
-                                <p class="mt-2 mb-0">Don't have an account? <span role="button" class="link-primary">Sign up</span></p>
+                                <p class="mt-2 mb-0">Don't have an account? <a href="register.html" role="button" class="link-primary text-decoration-none">Sign up</a></p>
                                 <div class="gap-2 d-flex justify-content-between align-items-center">
                                     <hr style="flex: 1; margin: 0;">or<hr style="flex: 1; margin: 0;">
                                 </div>

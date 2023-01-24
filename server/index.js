@@ -1,14 +1,49 @@
 // ---------- REQUIREMENTS
+
 const express = require('express'); // Express
+const mongoose = require('mongoose'); // Mongoose DB Users
 const bodyparser = require('body-parser'); // Body-Parser
 const jwt = require('jsonwebtoken'); // JWT
 const bcrypt = require('bcrypt'); // BCrypt
 const cors = require('cors'); // CORS
-const WebSocket = require('ws'); // WS
-const url = require('url'); // URL
-const spawner = require('child_process').spawn; // For Python Calc Script
+const initWSS = require('./wss/wss'); // WSS
+const initProxy = require('./proxy/proxy'); // Proxy
+const geoip = require('geoip-lite'); // Geolocation
+const http = require('http'); // HTTPS
 require('dotenv').config(); // DotENV
 
+// ---------- MONGOOSE
+
+mongoose.set('strictQuery', false);
+
+// Connect
+let DBUser = process.env.DB_USER;
+let DBPassword = process.env.DB_PASSWORD;
+let DBPort = process.env.DB_PORT;
+let DBName = process.env.DB_NAME;
+mongoose.connect('mongodb://' + DBUser + ':' + DBPassword + 
+'@localhost:' + DBPort + '/' + DBName + '?authSource=admin', () => {
+    console.log('Connect to DB!');
+});
+
+// Models
+const User = require('./models/User');
+
+// ---------- GEOLOCATION SERVER
+
+let ip, location, latitudeServer, longitudeServer;
+function setGeolocationServer() {
+    http.get({ 'host': 'api.ipify.org', 'port': 80, 'path': '/' }, (resp) => {
+        resp.on('data', (ipS) => {
+            ip = 'ip ' + ipS;
+            location = geoip.lookup(ip.split(' ')[1]);
+            if (location != null) {
+                latitudeServer = location.ll[0];
+                longitudeServer = location.ll[1];
+            }
+        });
+    });
+}
 
 // ---------- EXPRESS
 
@@ -17,77 +52,86 @@ const app = express();
 app.use(bodyparser.json());
 app.use(cors());
 
-// Login an user with his email and password
-app.post('/login', async (req, res) => {
+// Register an user with his email and password
+app.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
-    const password = await bcrypt.hash(req.body.password, salt);
-
-    const token = jwt.sign({
+    let password = req.body.password;
+    if (typeof password != 'string') {
+        return res.json({ 
+            status: 'wrongPassword',
+            message: 'Password must be a string...' 
+        });
+    }
+    password = await bcrypt.hash(password, salt);
+    
+    // Create user
+    let user = new User({
+        username: req.body.username,
         email: req.body.email,
         password: password
-    }, process.env.PRIVATE_KEY)
+    })
 
-    res.json({
-        token: token
-    });
+    // Save user
+    try {
+        await user.save();
+        res.json({ message: 'User created successfully. Redirecting...' });
+    } catch (err) { res.json({ status: 'alreadyExists', message: 'Email already exists...' }); }
+});
+
+// Login an user with his email and password
+app.post('/login', async (req, res) => {
+    let email = req.body.email;
+    let password = req.body.password;
+    
+    // If user registered, login it
+    let user = await User.find({ email: email });
+    if (user.length) {
+        if (email && password) {
+            bcrypt.compare(password, user[0].password, async (err, ress) => {
+                if (!ress) {
+                    return res.json({ 
+                        status: 'noUser',
+                        message: 'Incorrect email or password...' 
+                    });
+                } else {
+                    const salt = await bcrypt.genSalt(10);
+                    password = await bcrypt.hash(password, salt);
+                    const token = jwt.sign({
+                        email: email,
+                        password: password
+                    }, process.env.PRIVATE_KEY)
+                
+                    res.json({
+                        token: token
+                    });
+                }
+            });
+        } else res.json({ message: 'Data required...' });
+    } else res.json({ status: 'noUser', message: 'Incorrect email or password...' });
+});
+
+// Check Geolocation
+app.post('/position', async (req, res) => {
+    const latitude = req.body.lat;
+    const longitude = req.body.long;
+
+    // Check if the device is in range
+    if (latitude <= latitudeServer + 3 && latitude >= latitudeServer - 3 && 
+        longitude <= longitudeServer + 3 && longitude >= longitudeServer - 3) {
+        res.json({ status: 'ok', message: "Let's work" });
+    } else {
+        res.json({
+            status: 'error',
+            message: 'You need to be near or at the company to work...'
+        });
+    }
 });
 
 // Server listening...
-const PORT = process.env.PORT || 3001;
-let expressServer = app.listen(PORT, () => {
-    console.log(`Server running: ${PORT}`)
+const PORT = process.env.PORT;
+let expressServer = app.listen(PORT, async () => {
+    setGeolocationServer();
+    initProxy();
+    initWSS(expressServer);
+    console.log('Server running: ' + PORT)
 })
-
-
-// ---------- WEBSOCKET
-
-// WebSocket to recieve and send data between client and server
-const wss = new WebSocket.Server({ server: expressServer, path: '/ws' })
-var wsClients = []; // Saving clients when they open ws
-
-wss.on('connection', (ws, req) => {
-    var token = url.parse(req.url, true).query.token;
-    let remaining = 5, /* Remaining tries to client sending regexs */ result = null;
-
-    jwt.verify(token, process.env.PRIVATE_KEY, (err, decoded) => {
-        if (err) ws.close();
-        else wsClients[token] = ws;
-    });
-
-    ws.on('message', (data, isBinary) => {
-        const message = isBinary ? data : data.toString();
-        jwt.verify(token, process.env.PRIVATE_KEY, (err) => {
-            if (err) {
-                ws.send('Error: Your token is no longer valid...');
-                ws.close();
-            } else {
-                if (remaining <= 0) {
-                    ws.send('Remaining ' + 0);
-                    ws.close();
-                } else {
-                    // Use Python
-                    let process = spawner('python', ['calc.py', JSON.stringify({
-                        data_sent: message,
-                        data_returned: undefined
-                    })])
-                    process.stdout.on('data', (data, isBinary) => {
-                        result = isBinary ? data : data.toString();
-
-                        // If is a valid operation
-                        if (isNumeric(result.trim())) {
-                            remaining--;
-                            ws.send('Remaining ' + remaining);
-                            ws.send('Result ' + result);
-                        } else {
-                            ws.send('Invalid operation... Write it well.');
-                        }
-                    })
-                }
-            }
-        });
-    });
-});
-
-function isNumeric(value) {
-    return /^-?\d+$/.test(value);
-}
