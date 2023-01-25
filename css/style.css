@@ -424,9 +424,13 @@ form button {
 }
 
 .result-text {
+    height: 50px;
     padding: 0.5em 0.3em;
     font-size: 1.1em;
     border-bottom: 1px solid white;
+
+    display: flex;
+    align-items: flex-end;
 }
 
 .info-all {
@@ -467,4 +471,8 @@ form button {
 
 .error {
     color: #ea4335;
+}
+
+#equationLoader {
+    opacity: 0;
 }

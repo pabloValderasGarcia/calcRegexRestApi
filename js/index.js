@@ -1,3 +1,5 @@
+// VARIABLES
+
 let loginContainer = document.getElementById('loginContainer');
 let serviceContainer = document.getElementById('serviceContainer');
 let submitEq = document.getElementById('submitEq');
@@ -13,7 +15,7 @@ let locationEnabled = false;
 async function register(e, form) {
     e.preventDefault();
 
-    let data = await fetch('http://localhost:4444/register', {
+    let data = await fetch('https://localhost:443/register', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -44,7 +46,7 @@ async function login(e, form) {
 
     checkLocation(); // Execute location checker
 
-    let data = await fetch('http://localhost:4444/login', {
+    let data = await fetch('https://localhost:443/login', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -82,7 +84,7 @@ function checkLocation() {
             locationEnabled = true;
             const crd = pos.coords;
     
-            let data = await fetch('http://localhost:4444/position', {
+            let data = await fetch('https://localhost:443/position', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -99,6 +101,7 @@ function checkLocation() {
                 messages.style.opacity = '100%';
                 messages.textContent = 'You need to be near or at the company to work...';
                 submitEq.disabled = true;
+                if (ws) ws.close();
             }
         }, 
         (error) => {
@@ -108,6 +111,7 @@ function checkLocation() {
                     locationEnabled = false;
                     submitEq.disabled = true;
                     messages.textContent = 'User denied the request for Geolocation... Enable it and reload.';
+                    ws.close();
                     break;
                 case error.POSITION_UNAVAILABLE:
                     messages.textContent = 'Location information is unavailable...';
@@ -146,31 +150,41 @@ const openWsConnection = (jwtAuth) => {
 
     ws.onmessage = (event) => {
         let data = JSON.parse(event.data);
-        switch (data.message) {
-            case 'remaining':
-                remaining.innerHTML = 'REMAINING ' + '<span class="colored">' + data.remaining + '</span>';
-                result.innerHTML = data.value;
-                
-                if (data.remaining == 0) {
-                    submitEq.disabled = true;
-                    messages.textContent = 'You\'ve no more attempts... You\'re being redirected';
-                    messages.style.opacity = '100%';
-                    setTimeout(() => { window.location.reload() }, 4000)
-                }
-                break;
-            case 'error':
-                let operation = data.value.split('');
-                let error = operation.splice(data.column - 1).join('');
-                operation = operation.join('') + '<span class="error">' + error + '</span>';
+        result.innerHTML = '<span class="loader" id="equationLoader"></span>';
 
-                messages.textContent = 'Invalid operation... Write it well.';
-                messages.style.opacity = '100%';
-                result.innerHTML = operation;
-                break;
-            default:
-                messages.textContent = event.data;
-                messages.style.opacity = '100%';
-                break;
-        }
+        let equationLoader = document.getElementById('equationLoader');
+        equationLoader.style.opacity = '100%';
+        submitEq.disabled = true;
+
+        setTimeout(() => {
+            submitEq.disabled = false;
+            equationLoader.style.opacity = '0';
+            
+            switch (data.message) {
+                case 'remaining':
+                    remaining.innerHTML = 'REMAINING ' + '<span class="colored">' + data.remaining + '</span>';
+                    result.innerHTML = data.value;
+                    if (data.remaining == 0) {
+                        submitEq.disabled = true;
+                        messages.textContent = 'You\'ve no more attempts... You\'re being redirected';
+                        messages.style.opacity = '100%';
+                        setTimeout(() => { window.location.reload() }, 4000)
+                    }
+                    break;
+                case 'error':
+                    let operation = data.value.split('');
+                    let error = operation.splice(data.column - 1).join('');
+                    operation = operation.join('') + '<span class="error">' + error + '</span>';
+
+                    messages.textContent = 'Invalid operation... Write it well.';
+                    messages.style.opacity = '100%';
+                    result.innerHTML = operation;
+                    break;
+                default:
+                    messages.textContent = event.data;
+                    messages.style.opacity = '100%';
+                    break;
+            }
+        }, Math.floor(Math.random() * (6000 - 1000 + 1) + 1000));
     }
 }

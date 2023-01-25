@@ -31,18 +31,11 @@ const User = require('./models/User');
 
 // ---------- GEOLOCATION SERVER
 
-let ip, location, latitudeServer, longitudeServer;
+let latitudeServer, longitudeServer, rangeServer;
 function setGeolocationServer() {
-    http.get({ 'host': 'api.ipify.org', 'port': 80, 'path': '/' }, (resp) => {
-        resp.on('data', (ipS) => {
-            ip = 'ip ' + ipS;
-            location = geoip.lookup(ip.split(' ')[1]);
-            if (location != null) {
-                latitudeServer = location.ll[0];
-                longitudeServer = location.ll[1];
-            }
-        });
-    });
+    latitudeServer = parseFloat(process.env.LATITUDE_SERVER);
+    longitudeServer = parseFloat(process.env.LONGITUDE_SERVER);
+    rangeServer = parseFloat(process.env.RANGE_SERVER);
 }
 
 // ---------- EXPRESS
@@ -72,9 +65,7 @@ app.post('/register', async (req, res) => {
     })
 
     // Save user
-    try {
-        await user.save();
-        res.json({ message: 'User created successfully. Redirecting...' });
+    try { await user.save(); res.json({ message: 'User created successfully. Redirecting...' });
     } catch (err) { res.json({ status: 'alreadyExists', message: 'Email already exists...' }); }
 });
 
@@ -101,9 +92,7 @@ app.post('/login', async (req, res) => {
                         password: password
                     }, process.env.PRIVATE_KEY)
                 
-                    res.json({
-                        token: token
-                    });
+                    res.json({ token: token });
                 }
             });
         } else res.json({ message: 'Data required...' });
@@ -114,17 +103,14 @@ app.post('/login', async (req, res) => {
 app.post('/position', async (req, res) => {
     const latitude = req.body.lat;
     const longitude = req.body.long;
-
+    latitudeServer = latitude;
+    longitudeServer = longitude;
+    
     // Check if the device is in range
-    if (latitude <= latitudeServer + 3 && latitude >= latitudeServer - 3 && 
-        longitude <= longitudeServer + 3 && longitude >= longitudeServer - 3) {
+    if (latitude <= latitudeServer + rangeServer && latitude >= latitudeServer - rangeServer && 
+        longitude <= longitudeServer + rangeServer && longitude >= longitudeServer - rangeServer) {
         res.json({ status: 'ok', message: "Let's work" });
-    } else {
-        res.json({
-            status: 'error',
-            message: 'You need to be near or at the company to work...'
-        });
-    }
+    } else res.json({ status: 'error', message: 'You need to be near or at the company to work...' });
 });
 
 // Server listening...

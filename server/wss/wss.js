@@ -1,7 +1,12 @@
+// ---------- REQUIREMENTS
+
 const WebSocket = require('ws'); // WS
 const url = require('url'); // URL
 const jwt = require('jsonwebtoken'); // JWT
 const parser = require('../jison/grammar'); // JISON Parser
+const { equationQueue } = require('../queue/queue');
+
+// ---------- WSS
 
 function initWSS(expressServer) {
     const wss = new WebSocket.Server({ server: expressServer, path: '/ws' })
@@ -23,6 +28,16 @@ function initWSS(expressServer) {
                     ws.send('Error: Your token is no longer valid...');
                     ws.close();
                 } else {
+                    let equation = {
+                        token: token,
+                        message: message
+                    }
+                
+                    if (equation.token && equation.message) {
+                        equationQueue(equation);
+                    } else res.status(422);
+
+                    // Check remaining tries and send information to client
                     if (remaining <= 0) {
                         ws.send('Remaining ' + 0);
                         ws.close();
